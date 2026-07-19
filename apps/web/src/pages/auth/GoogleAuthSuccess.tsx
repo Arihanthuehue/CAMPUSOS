@@ -12,31 +12,47 @@ export function GoogleAuthSuccess() {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
 
+    const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : '');
+
+    console.log('[GoogleAuth] token from URL:', token ? token.substring(0, 50) + '...' : 'NULL');
+    console.log('[GoogleAuth] full URL:', window.location.href);
+    console.log('[GoogleAuth] VITE_API_URL:', import.meta.env.VITE_API_URL);
+
     if (!token) {
+      console.log('[GoogleAuth] No token found, redirecting to login');
       navigate('/login?error=google_failed', { replace: true });
       return;
     }
 
-    // Use the exact same localStorage key that AuthContext and tokenStorage use:
+    // Log what's currently in localStorage
+    console.log('[GoogleAuth] localStorage before set:', { ...localStorage });
+
     const tokenKey = 'campusos_token';
     localStorage.setItem(tokenKey, token);
 
-    // Verify the token works by fetching the current user from `/auth/me`
-    const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : '');
+    console.log('[GoogleAuth] token stored, now calling /auth/me');
+    console.log('[GoogleAuth] fetch URL:', `${apiBase}/api/v1/auth/me`);
+
     fetch(`${apiBase}/api/v1/auth/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
       .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch user');
-        return res.json();
+        console.log('[GoogleAuth] /auth/me status:', res.status);
+        console.log('[GoogleAuth] /auth/me ok:', res.ok);
+        return res.text().then(text => {
+          console.log('[GoogleAuth] /auth/me response body:', text);
+          if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
+          return text;
+        });
       })
       .then(() => {
-        // Token valid, user exists — do a full reload so AuthContext reinitializes from localStorage
+        console.log('[GoogleAuth] SUCCESS — redirecting to /');
         window.location.href = '/';
       })
-      .catch(() => {
+      .catch(err => {
+        console.log('[GoogleAuth] FAILED — error:', err.message);
         localStorage.removeItem(tokenKey);
         navigate('/login?error=google_failed', { replace: true });
       });
@@ -57,7 +73,6 @@ export function GoogleAuthSuccess() {
         height: 24,
         backgroundColor: '#C8F135',
         border: '2px solid #0A0A0A',
-        animation: 'brute-in 0.4s ease-out infinite alternate',
       }} />
       <p style={{
         fontFamily: 'Space Grotesk, sans-serif',
