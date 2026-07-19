@@ -41,7 +41,7 @@ export function Login() {
       {/* Google OAuth Button */}
       <div style={{marginBottom: 24}}>
         <a
-          href={import.meta.env.DEV ? "http://localhost:3000/api/v1/auth/google" : "/api/v1/auth/google"}
+          href={`${import.meta.env.VITE_API_URL}/api/v1/auth/google`}
           style={{
             display: 'flex',
             alignItems: 'center',
