@@ -1,10 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthContext } from '../../context/AuthContext';
 
 export function GoogleAuthSuccess() {
   const navigate = useNavigate();
-  const { loginWithToken } = useAuthContext();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -16,9 +14,11 @@ export function GoogleAuthSuccess() {
       return;
     }
 
-    // Store token and fetch user profile
-    loginWithToken(token).then(() => {
-      navigate('/', { replace: true });
+    // Store token exactly the same way the existing login flow stores it
+    import('../../lib/tokenStorage').then(({ setToken }) => {
+      setToken(token);
+      // Force a full page reload so AuthContext re-initializes and picks up the new token
+      window.location.replace('/');
     }).catch(() => {
       navigate('/login?error=google_failed', { replace: true });
     });
@@ -35,11 +35,10 @@ export function GoogleAuthSuccess() {
       gap: 16,
     }}>
       <div style={{
-        width: 20,
-        height: 20,
+        width: 24,
+        height: 24,
         backgroundColor: '#C8F135',
         border: '2px solid #0A0A0A',
-        animation: 'brute-in 0.3s ease-out infinite alternate',
       }} />
       <p style={{
         fontFamily: 'Space Grotesk, sans-serif',
@@ -48,6 +47,7 @@ export function GoogleAuthSuccess() {
         color: '#0A0A0A',
         textTransform: 'uppercase',
         letterSpacing: '0.08em',
+        margin: 0,
       }}>
         Signing you in...
       </p>
