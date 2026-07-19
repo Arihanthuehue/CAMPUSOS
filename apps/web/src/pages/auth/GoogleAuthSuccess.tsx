@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { setToken } from '../../lib/tokenStorage';
 
 export function GoogleAuthSuccess() {
   const navigate = useNavigate();
@@ -12,48 +13,31 @@ export function GoogleAuthSuccess() {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token');
 
-    const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : '');
-
-    console.log('[GoogleAuth] token from URL:', token ? token.substring(0, 50) + '...' : 'NULL');
-    console.log('[GoogleAuth] full URL:', window.location.href);
-    console.log('[GoogleAuth] VITE_API_URL:', import.meta.env.VITE_API_URL);
-
     if (!token) {
-      console.log('[GoogleAuth] No token found, redirecting to login');
       navigate('/login?error=google_failed', { replace: true });
       return;
     }
 
-    // Log what's currently in localStorage
-    console.log('[GoogleAuth] localStorage before set:', { ...localStorage });
+    // Store token using exact same function as rest of app
+    setToken(token);
 
-    const tokenKey = 'campusos_token';
-    localStorage.setItem(tokenKey, token);
-
-    console.log('[GoogleAuth] token stored, now calling /auth/me');
-    console.log('[GoogleAuth] fetch URL:', `${apiBase}/api/v1/auth/me`);
-
+    // Verify token by calling `/auth/me` (which matches what the rest of the app calls for getCurrentUser)
+    const apiBase = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3000' : '');
     fetch(`${apiBase}/api/v1/auth/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
       .then(res => {
-        console.log('[GoogleAuth] /auth/me status:', res.status);
-        console.log('[GoogleAuth] /auth/me ok:', res.ok);
-        return res.text().then(text => {
-          console.log('[GoogleAuth] /auth/me response body:', text);
-          if (!res.ok) throw new Error(`HTTP ${res.status}: ${text}`);
-          return text;
-        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
       })
       .then(() => {
-        console.log('[GoogleAuth] SUCCESS — redirecting to /');
+        // Full reload so AuthContext re-reads campusos_token from localStorage fresh
         window.location.href = '/';
       })
-      .catch(err => {
-        console.log('[GoogleAuth] FAILED — error:', err.message);
-        localStorage.removeItem(tokenKey);
+      .catch(() => {
+        localStorage.removeItem('campusos_token');
         navigate('/login?error=google_failed', { replace: true });
       });
   }, []);

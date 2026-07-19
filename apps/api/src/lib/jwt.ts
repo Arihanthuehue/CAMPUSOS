@@ -3,6 +3,8 @@ import { config } from '@/config';
 
 export interface JwtPayload {
   userId: string;
+  email?: string;
+  role?: string;
 }
 
 export const signToken = (payload: JwtPayload): string => {
