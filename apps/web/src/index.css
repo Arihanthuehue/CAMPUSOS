@@ -35,6 +35,16 @@
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: #F5F0E8; }
   ::-webkit-scrollbar-thumb { background: #0A0A0A; }
+
+  select {
+    color: #0A0A0A;
+    background-color: #FFFFFF;
+  }
+
+  select option {
+    color: #0A0A0A;
+    background-color: #FFFFFF;
+  }
 }
 
 @layer components {

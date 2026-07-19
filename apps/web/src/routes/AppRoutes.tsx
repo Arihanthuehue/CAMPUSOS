@@ -33,6 +33,7 @@ import { AnnouncementFeed } from "../pages/announcements/AnnouncementFeed";
 import { CreateAnnouncement } from "../pages/announcements/CreateAnnouncement";
 import { Leaderboard } from "../pages/leaderboard/Leaderboard";
 import { Gallery } from "../pages/gallery/Gallery";
+import { GoogleAuthSuccess } from "../pages/auth/GoogleAuthSuccess";
 
 function RedirectIfAuthenticated({ children }: { children: ReactElement }) {
   const { user } = useAuthContext();
@@ -71,6 +72,7 @@ export function AppRoutes() {
               </RedirectIfAuthenticated>
             }
           />
+          <Route path="/auth/google/success" element={<GoogleAuthSuccess />} />
         </Route>
 
         {/* --- Public: directories & detail pages --- */}

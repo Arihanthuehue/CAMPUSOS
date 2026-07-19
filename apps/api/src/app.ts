@@ -20,8 +20,21 @@ app.use(
   }),
 );
 
+import passport from './lib/passport';
+import session from 'express-session';
+
 // ── Body parsing ──────────────────────────────────────────────────────────────
 app.use(express.json());
+
+// ── Session & Passport ────────────────────────────────────────────────────────
+app.use(session({
+  secret: process.env.JWT_SECRET || 'campusos_session_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { secure: false },
+}));
+
+app.use(passport.initialize());
 
 // ── API v1 routes ─────────────────────────────────────────────────────────────
 app.use('/api/v1', v1Router);

@@ -2,6 +2,7 @@ import { Router } from 'express';
 
 // Default-export routers
 import authRouter from '@/modules/auth/routes';
+import googleAuthRouter from '@/modules/auth/google.routes';
 import usersRouter from '@/modules/users/routes';
 import clubRequestsRouter from '@/modules/club-requests/routes';
 import clubsRouter from '@/modules/clubs/routes';
@@ -20,6 +21,7 @@ const router = Router();
 
 // Auth
 router.use('/auth', authRouter);
+router.use('/auth', googleAuthRouter);
 
 // Users
 router.use('/users', usersRouter);

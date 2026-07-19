@@ -67,9 +67,19 @@ interface FormSelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 export function FormSelect({ label, name, error, hint, options, className, ...rest }: FormSelectProps) {
   return (
     <FieldShell label={label} htmlFor={name} error={error} hint={hint}>
-      <select id={name} name={name} className={`field-control ${className ?? ""}`} {...rest}>
+      <select
+        id={name}
+        name={name}
+        className={`field-control ${className ?? ""}`}
+        style={{ color: '#0A0A0A', backgroundColor: '#FFFFFF' }}
+        {...rest}
+      >
         {options.map((option) => (
-          <option key={option.value} value={option.value} className="bg-slate-900">
+          <option
+            key={option.value}
+            value={option.value}
+            style={{ color: '#0A0A0A', backgroundColor: '#FFFFFF' }}
+          >
             {option.label}
           </option>
         ))}

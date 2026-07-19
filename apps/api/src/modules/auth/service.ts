@@ -86,6 +86,9 @@ export const authService = {
     }
 
     // 2. Verify password
+    if (!user.passwordHash) {
+      throw new UnauthorizedError('Invalid email or password');
+    }
     const valid = await comparePassword(input.password, user.passwordHash);
     if (!valid) {
       throw new UnauthorizedError('Invalid email or password');

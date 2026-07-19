@@ -6,6 +6,63 @@ import { Pagination } from "../../components/ui/Pagination";
 import { EmptyState } from "../../components/ui/EmptyState";
 import { Skeleton } from "../../components/ui/Skeleton";
 
+const GALLERY_MOCK = [
+  {
+    id: '1',
+    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80',
+    caption: 'Annual Tech Fest 2024',
+    clubName: 'Coding Club',
+  },
+  {
+    id: '2',
+    imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&q=80',
+    caption: 'Hackathon Night',
+    clubName: 'Coding Club',
+  },
+  {
+    id: '3',
+    imageUrl: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=800&q=80',
+    caption: 'Open Mic Night',
+    clubName: 'Music Society',
+  },
+  {
+    id: '4',
+    imageUrl: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=800&q=80',
+    caption: 'Leadership Workshop',
+    clubName: 'Entrepreneurship Cell',
+  },
+  {
+    id: '5',
+    imageUrl: 'https://images.unsplash.com/photo-1561489401-fc2876ced162?w=800&q=80',
+    caption: 'Dance Showcase',
+    clubName: 'Dance Crew',
+  },
+  {
+    id: '6',
+    imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+    caption: 'Photography Walk',
+    clubName: 'Photography Club',
+  },
+  {
+    id: '7',
+    imageUrl: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&q=80',
+    caption: 'Campus Outdoor Shoot',
+    clubName: 'Photography Club',
+  },
+  {
+    id: '8',
+    imageUrl: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&q=80',
+    caption: 'Robotics Demo Day',
+    clubName: 'Robotics Club',
+  },
+  {
+    id: '9',
+    imageUrl: 'https://images.unsplash.com/photo-1496449903678-68ddcb189a24?w=800&q=80',
+    caption: 'Literary Fest',
+    clubName: 'Literary Society',
+  },
+];
+
 export function Gallery() {
   const [selectedClubId, setSelectedClubId] = useState<string>("");
   const [page, setPage] = useState(1);
@@ -27,6 +84,8 @@ export function Gallery() {
     page,
     limit,
   });
+
+  const displayItems = (galleryData?.items && galleryData.items.length > 0) ? galleryData.items : GALLERY_MOCK;
 
   const handleClubChange = (clubId: string) => {
     setSelectedClubId(clubId);
@@ -65,71 +124,76 @@ export function Gallery() {
         <div className="surface border-2 border-ink p-6 text-center bg-white rounded-none shadow-brutal">
           <p className="text-sm text-[#FF3B3B] font-bold">Failed to load gallery images.</p>
         </div>
-      ) : !galleryData || galleryData.items.length === 0 ? (
+      ) : displayItems.length === 0 ? (
         <EmptyState title="No images found" description="Try selecting a different club filter or upload some images first." />
       ) : (
         <>
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-            {galleryData.items.map((item) => {
-              const matchedClub = clubsData?.items.find((c) => c.id === item.clubId);
+            {displayItems.map((item) => {
+              const matchedClub = 'clubId' in item ? clubsData?.items.find((c) => c.id === (item as any).clubId) : null;
               return (
                 <div
                   key={item.id}
                   style={{
-                    backgroundColor: '#FFFFFF',
                     border: '2px solid #0A0A0A',
                     boxShadow: '4px 4px 0px #0A0A0A',
-                    borderRadius: 0,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    transition: 'transform 80ms ease-out, box-shadow 80ms ease-out',
                   }}
-                  className="group overflow-hidden"
+                  onMouseEnter={e => {
+                    e.currentTarget.style.transform = 'translate(-2px, -2px)';
+                    e.currentTarget.style.boxShadow = '6px 6px 0px #0A0A0A';
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.transform = 'translate(0,0)';
+                    e.currentTarget.style.boxShadow = '4px 4px 0px #0A0A0A';
+                  }}
                 >
-                  <div className="relative aspect-video overflow-hidden">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.caption || "Gallery image"}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80";
-                      }}
-                    />
-                    {matchedClub && (
-                      <span
-                        style={{
-                          backgroundColor: '#0A0A0A',
-                          color: '#C8F135',
-                          border: '1.5px solid #0A0A0A',
-                          fontFamily: 'DM Sans, sans-serif',
-                          fontSize: 9,
-                          fontWeight: 700,
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.06em',
-                          padding: '2px 6px',
-                          borderRadius: 0,
-                        }}
-                        className="absolute left-3 top-3"
-                      >
-                        {matchedClub.name}
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <p style={{ color: '#0A0A0A' }} className="text-sm font-semibold line-clamp-2 min-h-[2.5rem]">
-                      {item.caption || "No description provided."}
-                    </p>
-                    <div style={{ borderTop: '2px solid #0A0A0A', marginTop: 16, paddingTop: 12 }} className="flex items-center justify-between text-[11px] text-muted">
-                      <span>Uploaded by {item.createdBy?.name || "Member"}</span>
-                      <span className="font-mono">{new Date(item.createdAt).toLocaleDateString()}</span>
-                    </div>
+                  <img
+                    src={item.imageUrl}
+                    alt={item.caption || "Gallery image"}
+                    style={{width: '100%', height: 220, objectFit: 'cover', display: 'block'}}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    backgroundColor: '#0A0A0A',
+                    padding: '6px 10px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}>
+                    <span style={{color: '#FFFFFF', fontFamily: 'DM Sans, sans-serif', fontSize: 12, fontWeight: 600}} className="truncate mr-2">
+                      {item.caption || ""}
+                    </span>
+                    <span style={{
+                      backgroundColor: '#C8F135',
+                      color: '#0A0A0A',
+                      fontFamily: 'DM Sans, sans-serif',
+                      fontSize: 10,
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      padding: '1px 6px',
+                      border: '1px solid #0A0A0A',
+                      whiteSpace: 'nowrap',
+                    }}>
+                      {(item as any).clubName || matchedClub?.name || "Community"}
+                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-8">
-            <Pagination pagination={galleryData.pagination} onPageChange={setPage} />
-          </div>
+          {galleryData && galleryData.items.length > 0 && (
+            <div className="mt-8">
+              <Pagination pagination={galleryData.pagination} onPageChange={setPage} />
+            </div>
+          )}
         </>
       )}
     </div>

@@ -7,6 +7,7 @@ import { RequestStatusBadge } from "../../components/ui/RequestStatusBadge";
 import { ConfirmDialog } from "../../components/ui/ConfirmDialog";
 import { Skeleton } from "../../components/ui/Skeleton";
 import { ApiError } from "../../lib/apiError";
+import { useEventReminder } from "../../components/ui/EventReminder";
 
 function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString(undefined, {
@@ -61,6 +62,7 @@ export function EventDetail() {
   }
 
   const event = eventQuery.data!;
+  const { scheduleReminder } = useEventReminder(event.id, event.title, event.startTime);
   const isFull = event.capacity !== null && event.registeredCount >= event.capacity;
   const isExclusiveNonMember = event.type === "CLUB_EXCLUSIVE" && !!user && !isClubMemberOf(event.clubId);
 
@@ -139,7 +141,7 @@ export function EventDetail() {
         )}
 
         {event.status === "APPROVED" && (
-          <div className="mt-5">
+          <div className="mt-5 flex flex-wrap gap-3">
             {!user ? (
               <button
                 type="button"
@@ -169,6 +171,39 @@ export function EventDetail() {
                 {registerMutation.isPending ? "Registering…" : "Register"}
               </button>
             )}
+
+            <button
+              type="button"
+              onClick={scheduleReminder}
+              style={{
+                backgroundColor: '#FFFFFF',
+                color: '#0A0A0A',
+                border: '2px solid #0A0A0A',
+                boxShadow: '3px 3px 0px #0A0A0A',
+                padding: '10px 18px',
+                fontFamily: 'DM Sans, sans-serif',
+                fontWeight: 700,
+                fontSize: 11,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                cursor: 'pointer',
+                borderRadius: 0,
+                transition: 'transform 80ms, box-shadow 80ms',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLButtonElement).style.transform = 'translate(2px,2px)';
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = '1px 1px 0px #0A0A0A';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLButtonElement).style.transform = 'translate(0,0)';
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = '3px 3px 0px #0A0A0A';
+              }}
+            >
+              ⏰ SET REMINDER
+            </button>
           </div>
         )}
       </div>

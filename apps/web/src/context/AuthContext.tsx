@@ -9,6 +9,7 @@ interface AuthContextValue {
   token: string | null;
   isLoading: boolean;
   login: (payload: LoginPayload) => Promise<void>;
+  loginWithToken: (token: string) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
 }
@@ -48,6 +49,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [hydrateCurrentUser],
   );
 
+  const loginWithToken = useCallback(
+    async (newToken: string) => {
+      persistToken(newToken);
+      setTokenState(newToken);
+      await hydrateCurrentUser();
+    },
+    [hydrateCurrentUser],
+  );
+
   const register = useCallback(
     async (payload: RegisterPayload) => {
       const { token: newToken } = await authApi.register(payload);
@@ -70,10 +80,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       token,
       isLoading: !!token && isLoading,
       login,
+      loginWithToken,
       register,
       logout,
     }),
-    [user, token, isLoading, login, register, logout],
+    [user, token, isLoading, login, loginWithToken, register, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
